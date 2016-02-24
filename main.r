@@ -1,3 +1,9 @@
+# this is the main function which run the bootstrapped SVR 
+# It initialize the SVM using data sampled from the AM.
+# Then it perform the enhancement of the predictor
+# by re-training it over a training set that is 
+# at each timestep updated with data cominig from the operations.
+
 main <- function(amDatasetPath, opDatasetPath, nSampleAM, iterations){
   #TODO: add checks on the input parameters
 
