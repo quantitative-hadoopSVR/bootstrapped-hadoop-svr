@@ -64,6 +64,9 @@ X_nCores = analytical_shuffled_nCores(:, 2:end);
 %% keep it for possible future use and for applying both
 %% the techniques in any case (it still makes sense to compare 
 %% linear and RBF kernels, if possible (single attribute) ).
+%% Anyway according to the LIBSVM guide, since in our case 
+%% the number of instances is much higher than the number of
+%% features, we should expect to get better accuracy using the RBF kernel.
 %% No need to try the polynomial kernel, according to the LIBSVM guide.
 
 %% White box model, nCores^(-1)
