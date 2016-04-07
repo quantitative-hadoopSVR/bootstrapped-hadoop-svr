@@ -9,9 +9,16 @@ query_analytical_data = "analyt";
 query_operational_data = "oper";
 base_dir = "/Users/michele/MATLAB/bootstrapped-hadoop-svr/source_data/";
 
-% Splitting parameters
+%% Splitting parameters
 train_frac = 0.6;
 test_frac = 0.2;
+
+%% Ranges to be used to the identification
+%% of the optimal "C" and "epsilon" parameter of the SVR
+%% when using epsilon-SVR ( the SVR type used by Eugenio.
+%% we could investigate if it makes sense to try nu-SVR too ).
+C_range = linspace (0.1, 5, 20);
+E_range = linspace (0.1, 5, 20);
 
 %% Number of iterations for the re-training after the bootstrapping
 iterations = 1;
@@ -51,7 +58,37 @@ X_nCores = analytical_shuffled_nCores(:, 2:end);
 [Xtr_nCores, Xtst_nCores, Xcv_nCores] = split_sample (X_nCores, train_frac, test_frac);
 
 %% TODO: train the machine learner with the obtainted
-%% knowlege base.
+%% knowlege base. Built using linear kernel for "_nCores" dataset
+%% and using RBF kernel for full featured datasets 
+%% ( even if right now we don't have this distinction, let's
+%% keep it for possible future use and for applying both
+%% the techniques in any case (it still makes sense to compare 
+%% linear and RBF kernels, if possible (single attribute) ).
+%% No need to try the polynomial kernel, according to the LIBSVM guide.
+
+%% White box model, nCores^(-1)
+[C, eps] = model_selection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
+options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
+model = svmtrain (ytr_nCores, Xtr_nCores, options);
+[predictions(:, 2), accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
+Cs(2) = C;
+Es(2) = eps;
+RMSEs(2) = sqrt (accuracy(2));
+coefficients{2} = model.sv_coef;
+SVs{2} = model.SVs;
+b{2} = - model.rho;
+
+%% Black box model, RBF
+[C, eps] = model_selection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
+options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
+model = svmtrain (ytr, Xtr, options);
+[predictions(:, 4), accuracy, ~] = svmpredict (ycv, Xcv, model);
+Cs(4) = C;
+Es(4) = eps;
+RMSEs(4) = sqrt (accuracy(2));
+coefficients{4} = model.sv_coef;
+SVs{4} = model.SVs;
+b{4} = - model.rho;
 
 %%
 for ii = 1: iterations
@@ -82,7 +119,5 @@ for ii = 1: iterations
   %% TODO: re-train the machine learner with the updated
   %% knowlege base. 
   
-  %% TODO: evaluate ( generate also some plots ) the current accuracy 
-  %% of the machine learner
 endfor
 
