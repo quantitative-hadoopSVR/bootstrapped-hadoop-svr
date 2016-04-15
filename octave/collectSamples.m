@@ -1,4 +1,4 @@
-function [clean_sample, clean_sample_nCores]  = colletSamples (directory, nSlots, timestep)
+function [clean_sample, clean_sample_nCores]  = collectSamples (directory, nSlots, timestep)
 
 if (! ischar (directory))
   error ("read_from_directory: DIRECTORY should be a string");
@@ -16,6 +16,8 @@ for ii = 1:numel (files)
   %% real experiment is performed sampling the same
   %% number of observations.
   window_size = size (last_sample)(1) ./ nSlots;
+  window_size
+  timestep
   current_sample = last_sample [window_size .* (timestep - 1) : window_size .* (timestep), :]
   sample = [sample; current_sample];
 endfor

@@ -7,7 +7,7 @@ clc
 %% the operational data.
 query_analytical_data = "analyt";
 query_operational_data = "oper";
-base_dir = "/Users/michele/MATLAB/bootstrapped-hadoop-svr/source_data/";
+base_dir = "/home/irma/quantitative/bootstrapped-hadoop-svr/source_data/";
 
 %% Splitting parameters
 train_frac = 0.6;
@@ -70,7 +70,7 @@ X_nCores = analytical_shuffled_nCores(:, 2:end);
 %% No need to try the polynomial kernel, according to the LIBSVM guide.
 
 %% White box model, nCores^(-1)
-[C, eps] = model_selection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
+[C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
 model = svmtrain (ytr_nCores, Xtr_nCores, options);
 [predictions(:, 2), accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
@@ -82,7 +82,7 @@ SVs{2} = model.SVs;
 b{2} = - model.rho;
 
 %% Black box model, RBF
-[C, eps] = model_selection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
+[C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
 model = svmtrain (ytr, Xtr, options);
 [predictions(:, 4), accuracy, ~] = svmpredict (ycv, Xcv, model);
@@ -121,6 +121,7 @@ for ii = 1: iterations
   
   %% TODO: re-train the machine learner with the updated
   %% knowlege base. 
+  %% At the end, improvement for different runs
   
 endfor
 

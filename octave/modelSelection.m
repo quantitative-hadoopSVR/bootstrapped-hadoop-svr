@@ -1,4 +1,4 @@
-function [C, epsilon] = model_selection (ytrain, Xtrain, ytest, Xtest, options, C_range, epsilon_range)
+function [C, epsilon] = modelSelection (ytrain, Xtrain, ytest, Xtest, options, C_range, epsilon_range)
 
 raw_options = options;
 C_range = C_range(:)';
