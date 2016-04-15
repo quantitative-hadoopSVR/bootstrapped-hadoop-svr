@@ -98,7 +98,7 @@ for ii = 1: iterations
   
   %% sampling the operational data for the current iteration.
   [operational_sample, operational_sample_nCore] = collectSamples ([base_dir, query_operational_data], iterations, ii)
-  
+  [operational_sample, operational_sample_nCore]
   %% Scaling and permutating the operational dataset 
   %% for the current iteration
   rand ("seed", 17);
