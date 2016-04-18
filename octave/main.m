@@ -7,7 +7,7 @@ clc
 %% the operational data.
 query_analytical_data = "analyt";
 query_operational_data = "oper";
-base_dir = "/home/irma/quantitative/bootstrapped-hadoop-svr/source_data/";
+base_dir = "/Users/michele/Desktop/corsi_phd/Quantitative/progetto/bootstrapped-hadoop-svr/source_data/";
 
 %% Splitting parameters
 train_frac = 0.6;
@@ -21,7 +21,7 @@ C_range = linspace (0.1, 5, 20);
 E_range = linspace (0.1, 5, 20);
 
 %% Number of iterations for the re-training after the bootstrapping
-iterations = 1;
+iterations = 3;
 
 %% Initializing the Knowledge Base sampling the analytical data
 [analytical_sample, analytical_sample_nCore] = initKB ([base_dir, query_analytical_data]);
@@ -44,7 +44,7 @@ analytical_shuffled_nCores = analytical_scaled_nCores(permutation, :);
 mu_X_nCores = mu(2:end);
 sigma_X_nCores = sigma(2:end);
 
-%% Separating prediction variables from target variable in the analytical dataser
+%% Separating prediction variables from target variable in the analytical dataset
 y = analytical_shuffled(:, 1);
 X= analytical_shuffled(:, 2:end);
 
@@ -70,35 +70,40 @@ X_nCores = analytical_shuffled_nCores(:, 2:end);
 %% No need to try the polynomial kernel, according to the LIBSVM guide.
 
 %% White box model, nCores^(-1)
+sprintf("Training the SVR from on analytical model (nCores).")
 [C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
 model = svmtrain (ytr_nCores, Xtr_nCores, options);
-[predictions(:, 2), accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
-Cs(2) = C;
-Es(2) = eps;
-RMSEs(2) = sqrt (accuracy(2));
-coefficients{2} = model.sv_coef;
-SVs{2} = model.SVs;
-b{2} = - model.rho;
+[predictions(:, 1), accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
+Cs(1) = C;
+Es(1) = eps;
+RMSEs(1) = sqrt (accuracy(2));
+coefficients{1} = model.sv_coef;
+SVs{1} = model.SVs;
+b{1} = - model.rho;
 
 %% Black box model, RBF
+sprintf("Training the SVR from on analytical model.")
 [C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
 model = svmtrain (ytr, Xtr, options);
-[predictions(:, 4), accuracy, ~] = svmpredict (ycv, Xcv, model);
-Cs(4) = C;
-Es(4) = eps;
-RMSEs(4) = sqrt (accuracy(2));
-coefficients{4} = model.sv_coef;
-SVs{4} = model.SVs;
-b{4} = - model.rho;
+[predictions(:, 1), accuracy, ~] = svmpredict (ycv, Xcv, model);
+Cs(1) = C;
+Es(1) = eps;
+RMSEs(1) = sqrt (accuracy(2));
+coefficients{1} = model.sv_coef;
+SVs{1} = model.SVs;
+b{1} = - model.rho;
+
+current_KB = analytical_shuffled;
+current_KB_nCore = analytical_shuffled_nCores;
 
 %%
 for ii = 1: iterations
   
   %% sampling the operational data for the current iteration.
-  [operational_sample, operational_sample_nCore] = collectSamples ([base_dir, query_operational_data], iterations, ii)
-  [operational_sample, operational_sample_nCore]
+  [operational_sample, operational_sample_nCore] = collectSamples ([base_dir, query_operational_data], iterations, ii);
+  [operational_sample, operational_sample_nCore];
   %% Scaling and permutating the operational dataset 
   %% for the current iteration
   rand ("seed", 17);
@@ -115,13 +120,56 @@ for ii = 1: iterations
   [operational_scaled_nCores, mu, sigma] = zscore (operational_sample_nCore);
   operational_shuffled_nCores = operational_scaled_nCores(permutation, :);
   
-  %% TODO: updating the knowledge base [analytical_shuffled] 
-  %% and [analytical_shuffled_nCore] with the operational sample
+  %% TODO: updating the knowledge base [current_KB] 
+  %% and [current_KB_nCore] with the operational sample
   %% for the current iteration
+
+  current_KB = updateKB (current_KB, operational_shuffled);
+  current_KB_nCore = updateKB (current_KB_nCore, operational_shuffled_nCores);
   
   %% TODO: re-train the machine learner with the updated
   %% knowlege base. 
   %% At the end, improvement for different runs
+
+  %% Separating prediction variables from target variable in the analytical dataset
+  y = current_KB(:, 1);
+  X= current_KB(:, 2:end);
+
+  y_nCores = current_KB_nCore(:, 1);
+  X_nCores = current_KB_nCore(:, 2:end);
+
+  %% Splitting the analytical datasets
+  [ytr, ytst, ycv] = split_sample (y, train_frac, test_frac);
+  [Xtr, Xtst, Xcv] = split_sample (X, train_frac, test_frac);
+  [ytr_nCores, ytst_nCores, ycv_nCores] = split_sample (y_nCores, train_frac, test_frac);
+  [Xtr_nCores, Xtst_nCores, Xcv_nCores] = split_sample (X_nCores, train_frac, test_frac);
+
+  %% White box model, nCores^(-1)
+  sprintf("Re-training (%d) the SVR from on analytical model (nCores).", ii)
+  [C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
+  options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
+  model = svmtrain (ytr_nCores, Xtr_nCores, options);
+  size(ycv_nCores)
+  size(Xcv_nCores)
+  [predictions(:, 1), accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
+  RMSEs(1) = sqrt (accuracy(2));
+  coefficients{1} = model.sv_coef;
+  SVs{1} = model.SVs;
+  b{1} = - model.rho;
+
+  %% Black box model, RBF
+  sprintf("Re-training (%d) the SVR from on analytical model.", ii)
+  [C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
+  options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
+  model = svmtrain (ytr, Xtr, options);
+  [predictions(:, 2), accuracy, ~] = svmpredict (ycv, Xcv, model);
+  Cs(2) = C;
+  Es(2) = eps;
+  RMSEs(2) = sqrt (accuracy(2));
+  coefficients{2} = model.sv_coef;
+  SVs{2} = model.SVs;
+  b{2} = - model.rho;
+
   
 endfor
 
