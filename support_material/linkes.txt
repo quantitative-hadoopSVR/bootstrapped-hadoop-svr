@@ -1,1 +1,8 @@
 http://www.svm-tutorial.com/2014/10/support-vector-regression-r/
+
+
+KNN links
+
+http://octave.sourceforge.net/geometry/function/knnGraph.html
+https://github.com/markuman/fastKNN
+http://www.mathworks.com/matlabcentral/fileexchange/15562-k-nearest-neighbors
