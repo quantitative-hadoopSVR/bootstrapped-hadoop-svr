@@ -7,7 +7,7 @@ clc
 %% the operational data.
 query_analytical_data = "analyt";
 query_operational_data = "oper";
-base_dir = "/Users/michele/Desktop/corsi_phd/Quantitative/progetto/bootstrapped-hadoop-svr/source_data/";
+base_dir = "/home/irma/quantitative/bootstrapped-hadoop-svr/source_data/";
 
 %% Splitting parameters
 train_frac = 0.6;
@@ -44,7 +44,7 @@ analytical_shuffled_nCores = analytical_scaled_nCores(permutation, :);
 mu_X_nCores = mu(2:end);
 sigma_X_nCores = sigma(2:end);
 
-%% Separating prediction variables from target variable in the analytical dataset
+%% Separating prediction variables from target variable in the analytical dataset get first column in y and second in X. 
 y = analytical_shuffled(:, 1);
 X= analytical_shuffled(:, 2:end);
 
@@ -69,7 +69,7 @@ X_nCores = analytical_shuffled_nCores(:, 2:end);
 %% features, we should expect to get better accuracy using the RBF kernel.
 %% No need to try the polynomial kernel, according to the LIBSVM guide.
 
-%% White box model, nCores^(-1)
+%% White box model, nCores^(-1) 
 sprintf("Training the SVR from on analytical model (nCores).")
 [C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
@@ -78,9 +78,11 @@ model = svmtrain (ytr_nCores, Xtr_nCores, options);
 Cs_nCore(1) = C;
 Es_nCore(1) = eps;
 RMSEs_nCore(1) = sqrt (accuracy(2));
+MSE_nCore(1)=accuracy(2);
 coefficients_nCore{1} = model.sv_coef;
 SVs_nCore{1} = model.SVs;
 b_nCore{1} = - model.rho;
+
 
 %% Black box model, RBF
 sprintf("Training the SVR from on analytical model.")
@@ -91,9 +93,25 @@ model = svmtrain (ytr, Xtr, options);
 Cs(1) = C;
 Es(1) = eps;
 RMSEs(1) = sqrt (accuracy(2));
+MSE(1)=accuracy(2);
 coefficients{1} = model.sv_coef;
 SVs{1} = model.SVs;
 b{1} = - model.rho;
+'
+%% Black box model, RBF where you choose best parameters first and then train the model
+sprintf("Training the SVR from on analytical model.Black box model, RBF with best parameters")
+[bestcv,bestc,bestg]=parameter_selection (ytr,Xtr);
+options = ["-s 3 -t 2 -h 0 -g ", num2str(bestg), " -c ", num2str(bestc), " -v ", num2str(bestcv)];
+model_CV = svmtrain (ytr, Xtr, options);
+[predictions_CV{1}, accuracy_CV, ~] = svmpredict (ycv, Xcv, model);
+Cs_CV(1) = bestc;
+Es_CV(1) = model.epsilon;
+RMSE_CVs(1) = sqrt (accuracy_CV(2));
+MSE_CV(1)=accuracy_CV(2);
+coefficients_CV{1} = model.sv_coef;
+SVs_CV{1} = model.SVs;
+b_CV{1} = - model.rho;
+'
 
 current_KB = analytical_shuffled;
 current_KB_nCore = analytical_shuffled_nCores;
@@ -153,19 +171,24 @@ for ii = 1: length(operational_data_chunks)
   [predictions_nCore{ii+1}, accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
   Cs_nCore(ii+1) = C;
   Es_nCore(ii+1) = eps;
+  MSE_nCore(ii+1)=accuracy(2);
   RMSEs_nCore(ii+1) = sqrt (accuracy(2));
   coefficients_nCore{ii+1} = model.sv_coef;
   SVs_nCore{ii+1} = model.SVs;
   b_nCore{ii+1} = - model.rho;
+
+
 
   %% Black box model, RBF
   sprintf("Re-training (%d) the SVR from on analytical model.", ii)
   [C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
   model = svmtrain (ytr, Xtr, options);
+
   [predictions{ii+1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
   Cs(ii+1) = C;
   Es(ii+1) = eps;
+  MSE(ii+1)=accuracy(2);
   RMSEs(ii+1) = sqrt (accuracy(2));
   coefficients{ii+1} = model.sv_coef;
   SVs{ii+1} = model.SVs;
@@ -173,4 +196,10 @@ for ii = 1: length(operational_data_chunks)
 
   
 endfor
+%check output meaning
+  model.totalSV;
+  model.nSV;
+  %plot(model.SVs);
+  %plot(model.SVs_nCore);
+  %plot(model.SVR);
 
