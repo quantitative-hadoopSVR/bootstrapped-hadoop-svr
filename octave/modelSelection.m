@@ -10,7 +10,7 @@ MSE = Inf;
 for (cc = C_range)
   for (ee = epsilon_range)
     options = [raw_options, " -p ", num2str(ee), " -c ", num2str(cc)];
-    model = svmtrain (ytrain, Xtrain, options);
+    model = svmtrain ([],ytrain, Xtrain, options);
     [~, accuracy, ~] = svmpredict (ytest, Xtest, model, "-q");
     mse = accuracy(2);
     if (mse < MSE)
