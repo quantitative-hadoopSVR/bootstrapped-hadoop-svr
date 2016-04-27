@@ -13,6 +13,7 @@ base_dir = "/home/irma/quantitative/bootstrapped-hadoop-svr/source_data/";
 train_frac = 0.6;
 test_frac = 0.2;
 
+
 %% Ranges to be used to the identification
 %% of the optimal "C" and "epsilon" parameter of the SVR
 %% when using epsilon-SVR ( the SVR type used by Eugenio.
@@ -25,6 +26,7 @@ iterations = 3;
 
 %% Initializing the Knowledge Base sampling the analytical data
 [analytical_sample, analytical_sample_nCore] = initKB ([base_dir, query_analytical_data]);
+
 
 %% Scaling and permutating the analytical dataset
 rand ("seed", 17);
@@ -71,9 +73,10 @@ X_nCores = analytical_shuffled_nCores(:, 2:end);
 
 %% White box model, nCores^(-1) 
 sprintf("Training the SVR from on analytical model (nCores).")
+%weight_nCore(1:size(ytr_nCores,1))=1;
 [C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-model = svmtrain (ytr_nCores, Xtr_nCores, options);
+model = svmtrain ([],ytr_nCores, Xtr_nCores, options);
 [predictions_nCore{1}, accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
 Cs_nCore(1) = C;
 Es_nCore(1) = eps;
@@ -86,9 +89,10 @@ b_nCore{1} = - model.rho;
 
 %% Black box model, RBF
 sprintf("Training the SVR from on analytical model.")
+
 [C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-model = svmtrain (ytr, Xtr, options);
+model = svmtrain ([],ytr, Xtr, options);
 [predictions{1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
 Cs(1) = C;
 Es(1) = eps;
@@ -97,12 +101,12 @@ MSE(1)=accuracy(2);
 coefficients{1} = model.sv_coef;
 SVs{1} = model.SVs;
 b{1} = - model.rho;
-'
+#{
 %% Black box model, RBF where you choose best parameters first and then train the model
 sprintf("Training the SVR from on analytical model.Black box model, RBF with best parameters")
 [bestcv,bestc,bestg]=parameter_selection (ytr,Xtr);
 options = ["-s 3 -t 2 -h 0 -g ", num2str(bestg), " -c ", num2str(bestc), " -v ", num2str(bestcv)];
-model_CV = svmtrain (ytr, Xtr, options);
+model_CV = svmtrain ([],ytr, Xtr, options);
 [predictions_CV{1}, accuracy_CV, ~] = svmpredict (ycv, Xcv, model);
 Cs_CV(1) = bestc;
 Es_CV(1) = model.epsilon;
@@ -111,7 +115,7 @@ MSE_CV(1)=accuracy_CV(2);
 coefficients_CV{1} = model.sv_coef;
 SVs_CV{1} = model.SVs;
 b_CV{1} = - model.rho;
-'
+#}
 
 current_KB = analytical_shuffled;
 current_KB_nCore = analytical_shuffled_nCores;
@@ -167,7 +171,7 @@ for ii = 1: length(operational_data_chunks)
   sprintf("Re-training (%d) the SVR from on analytical model (nCores).", ii)
   [C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-  model = svmtrain (ytr_nCores, Xtr_nCores, options);
+  model = svmtrain ([], ytr_nCores, Xtr_nCores, options);
   [predictions_nCore{ii+1}, accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
   Cs_nCore(ii+1) = C;
   Es_nCore(ii+1) = eps;
@@ -183,8 +187,7 @@ for ii = 1: length(operational_data_chunks)
   sprintf("Re-training (%d) the SVR from on analytical model.", ii)
   [C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-  model = svmtrain (ytr, Xtr, options);
-
+  model = svmtrain ([], ytr, Xtr, options);
   [predictions{ii+1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
   Cs(ii+1) = C;
   Es(ii+1) = eps;
