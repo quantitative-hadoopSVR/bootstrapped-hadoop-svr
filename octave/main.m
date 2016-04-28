@@ -179,7 +179,7 @@ for ii = 1: length(operational_data_chunks)
   [Wtr, Wtst, Wcv] = split_sample (weight, train_frac, test_frac);
   [ytr_nCores, ytst_nCores, ycv_nCores] = split_sample (y_nCores, train_frac, test_frac);
   [Xtr_nCores, Xtst_nCores, Xcv_nCores] = split_sample (X_nCores, train_frac, test_frac);
-  [Wtr_nCores, Wtst_nCores, Wcv_nCores] = split_sample (X_nCores, train_frac, test_frac);
+  [Wtr_nCores, Wtst_nCores, Wcv_nCores] = split_sample (weight_nCores, train_frac, test_frac);
 
   %% White box model, nCores^(-1)
   sprintf("Re-training (%d) the SVR from on analytical model (nCores).", ii)
