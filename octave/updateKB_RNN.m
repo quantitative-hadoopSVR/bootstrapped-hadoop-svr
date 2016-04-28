@@ -1,6 +1,6 @@
   % Update function implemented with the KNN algorithm considering the euclidian distance.
 
-  function [updated, new_weight]  = updateKB (current_kb, sample_to_add, old_weight)
+  function [updated, new_weight]  = updateKB_RNN (current_kb, sample_to_add, old_weight)
   
   %%Assign weights to new samples. For now we consider that new samples are all
   %%weighted with the same value 2. 

@@ -1,13 +1,14 @@
 clear all
 close all hidden
 clc
+warning("off")
 
 %% Input data parameters: path to folder containing 
 %% the analytical data and to folder containing 
 %% the operational data.
 query_analytical_data = "analyt";
 query_operational_data = "oper";
-base_dir = "/home/irma/quantitative/bootstrapped-hadoop-svr/source_data/";
+base_dir = "../source_data/";
 
 %% Splitting parameters
 train_frac = 0.6;
@@ -40,31 +41,33 @@ sigma_ = sigma(1);
 mu_X = mu(2:end);
 sigma_X = sigma(2:end);
 
-[analytical_scaled_nCores, mu, sigma] = zscore (analytical_sample_nCore);
-analytical_shuffled_nCores = analytical_scaled_nCores(permutation, :);
+[analytical_scaled_linear, mu, sigma] = zscore (analytical_sample_nCore);
+analytical_shuffled_linear = analytical_scaled_linear(permutation, :);
 
-mu_X_nCores = mu(2:end);
-sigma_X_nCores = sigma(2:end);
+mu_X_linear = mu(2:end);
+sigma_X_linear = sigma(2:end);
 
 %% Separating prediction variables from target variable in the analytical dataset get first column in y and second in X. 
 y = analytical_shuffled(:, 1);
 X= analytical_shuffled(:, 2:end);
 
-y_nCores = analytical_shuffled_nCores(:, 1);
-X_nCores = analytical_shuffled_nCores(:, 2:end);
+y_linear = analytical_shuffled_linear(:, 1);
+X_linear = analytical_shuffled_linear(:, 2:end);
+
+%% Assign weights 1 for the first iteration
+weight=ones(size(analytical_shuffled,1),1) * 2;
+weight_linear=ones(size(analytical_shuffled_linear,1),1) * 2;
 
 %% Splitting the analytical datasets
 [ytr, ytst, ycv] = split_sample (y, train_frac, test_frac);
 [Xtr, Xtst, Xcv] = split_sample (X, train_frac, test_frac);
-[ytr_nCores, ytst_nCores, ycv_nCores] = split_sample (y_nCores, train_frac, test_frac);
-[Xtr_nCores, Xtst_nCores, Xcv_nCores] = split_sample (X_nCores, train_frac, test_frac);
-
-%% Assign weights 1 for the first iteration
-weight=ones(size(ytr_nCores,1),1);
-weight_nCores=ones(size(ytr_nCores,1),1);
+[Wtr, Wtst, Wcv] = split_sample (weight, train_frac, test_frac);
+[ytr_linear, ytst_linear, ycv_linear] = split_sample (y_linear, train_frac, test_frac);
+[Xtr_linear, Xtst_linear, Xcv_linear] = split_sample (X_linear, train_frac, test_frac);
+[Wtr_linear, Wtst_linear, Wcv_linear] = split_sample (weight_linear, train_frac, test_frac);
 
 %% TODO: train the machine learner with the obtainted
-%% knowlege base. Built using linear kernel for "_nCores" dataset
+%% knowlege base. Built using linear kernel for "_linear" dataset
 %% and using RBF kernel for full featured datasets 
 %% ( even if right now we don't have this distinction, let's
 %% keep it for possible future use and for applying both
@@ -75,12 +78,12 @@ weight_nCores=ones(size(ytr_nCores,1),1);
 %% features, we should expect to get better accuracy using the RBF kernel.
 %% No need to try the polynomial kernel, according to the LIBSVM guide.
 
-%% White box model, nCores^(-1) 
-sprintf("Training the SVR from on analytical model (nCores).")
-[C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
+%% Linear kernel model
+sprintf("Training the SVR from on analytical model (linear).")
+[C, eps] = modelSelection (Wtr_linear, ytr_linear, Xtr_linear, ytst_linear, Xtst_linear, "-s 3 -t 0 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-model = svmtrain (weight,ytr_nCores, Xtr_nCores, options);
-[predictions_nCore{1}, accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
+model = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
+[predictions_nCore{1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model);
 Cs_nCore(1) = C;
 Es_nCore(1) = eps;
 RMSEs_nCore(1) = sqrt (accuracy(2));
@@ -90,11 +93,11 @@ SVs_nCore{1} = model.SVs;
 b_nCore{1} = - model.rho;
 
 
-%% Black box model, RBF
+%% RBF kernel model
 sprintf("Training the SVR from on analytical model.")
-[C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
+[C, eps] = modelSelection (Wtr, ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-model = svmtrain (weight_nCores,ytr, Xtr, options);
+model = svmtrain (Wtr,ytr, Xtr, options);
 [predictions{1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
 Cs(1) = C;
 Es(1) = eps;
@@ -104,7 +107,7 @@ coefficients{1} = model.sv_coef;
 SVs{1} = model.SVs;
 b{1} = - model.rho;
 #{
-%% Black box model, RBF where you choose best parameters first and then train the model
+%% RBF kernel model, where you choose best parameters first and then train the model
 sprintf("Training the SVR from on analytical model.Black box model, RBF with best parameters")
 [bestcv,bestc,bestg]=parameter_selection (ytr,Xtr);
 options = ["-s 3 -t 2 -h 0 -g ", num2str(bestg), " -c ", num2str(bestc), " -v ", num2str(bestcv)];
@@ -121,10 +124,7 @@ b_CV{1} = - model.rho;
 
 
 current_KB = analytical_shuffled;
-current_KB_nCore = analytical_shuffled_nCores;
-
-weight=ones(size(analytical_shuffled,1),1);
-weight_nCores=ones(size(analytical_shuffled_nCores,1),1);
+current_KB_nCore = analytical_shuffled_linear;
 
 operational_data_chunks = collectSamples ([base_dir, query_operational_data], iterations);
 
@@ -153,11 +153,10 @@ for ii = 1: length(operational_data_chunks)
   %% TODO: updating the knowledge base [current_KB] 
   %% and [current_KB_nCore] with the operational sample
   %% for the current iteration
-  [current_KB, current_weight] = updateKB (current_KB, current_chunk_shuffled, weight);
-  [current_KB_nCore, current_weight_Ncores] = updateKB (current_KB_nCore, current_chunk_nCore_shuffled, weight_nCores);
+  %% Use here the preferred update function among the available ones (merge or RNN).
+  [current_KB, current_weight] = updateKB_RNN(current_KB, current_chunk_shuffled, weight);
+  [current_KB_nCore, current_weight_linear] = updateKB_RNN (current_KB_nCore, current_chunk_nCore_shuffled, weight_linear);
 
-
-  
   %% TODO: re-train the machine learner with the updated
   %% knowlege base. 
   %% At the end, improvement for different runs
@@ -169,24 +168,24 @@ for ii = 1: length(operational_data_chunks)
   weight = current_weight;
 
   
-  y_nCores = current_KB_nCore(:, 1);
-  X_nCores = current_KB_nCore(:, 2:end);
-  weight_nCores = current_weight_Ncores;
+  y_linear = current_KB_nCore(:, 1);
+  X_linear = current_KB_nCore(:, 2:end);
+  weight_linear = current_weight_linear;
   
   %% Splitting the analytical datasets and weights accordingly
   [ytr, ytst, ycv] = split_sample (y, train_frac, test_frac);
   [Xtr, Xtst, Xcv] = split_sample (X, train_frac, test_frac);
   [Wtr, Wtst, Wcv] = split_sample (weight, train_frac, test_frac);
-  [ytr_nCores, ytst_nCores, ycv_nCores] = split_sample (y_nCores, train_frac, test_frac);
-  [Xtr_nCores, Xtst_nCores, Xcv_nCores] = split_sample (X_nCores, train_frac, test_frac);
-  [Wtr_nCores, Wtst_nCores, Wcv_nCores] = split_sample (weight_nCores, train_frac, test_frac);
+  [ytr_linear, ytst_linear, ycv_linear] = split_sample (y_linear, train_frac, test_frac);
+  [Xtr_linear, Xtst_linear, Xcv_linear] = split_sample (X_linear, train_frac, test_frac);
+  [Wtr_linear, Wtst_linear, Wcv_linear] = split_sample (weight_linear, train_frac, test_frac);
 
-  %% White box model, nCores^(-1)
-  sprintf("Re-training (%d) the SVR from on analytical model (nCores).", ii)
-  [C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
+  %% White box model, linear^(-1)
+  sprintf("Re-training (%d) the SVR from on analytical model (linear).", ii)
+  [C, eps] = modelSelection (Wtr_linear, ytr_linear, Xtr_linear, ytst_linear, Xtst_linear, "-s 3 -t 0 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-  model = svmtrain (Wtr, ytr_nCores, Xtr_nCores, options);
-  [predictions_nCore{ii+1}, accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
+  model = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
+  [predictions_nCore{ii+1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model);
   Cs_nCore(ii+1) = C;
   Es_nCore(ii+1) = eps;
   MSE_nCore(ii+1)=accuracy(2);
@@ -199,9 +198,9 @@ for ii = 1: length(operational_data_chunks)
 
   %% Black box model, RBF
   sprintf("Re-training (%d) the SVR from on analytical model.", ii)
-  [C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
+  [C, eps] = modelSelection (Wtr, ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-  model = svmtrain (Wtr_nCores, ytr, Xtr, options);
+  model = svmtrain (Wtr, ytr, Xtr, options);
   [predictions{ii+1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
   [predictions{ii+1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
   Cs(ii+1) = C;
