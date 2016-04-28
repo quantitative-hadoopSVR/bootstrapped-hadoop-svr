@@ -1,1 +1,4 @@
 .DS_Store
+*.mex
+*.o
+tester.m
