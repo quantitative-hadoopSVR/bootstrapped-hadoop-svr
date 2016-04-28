@@ -59,6 +59,10 @@ X_nCores = analytical_shuffled_nCores(:, 2:end);
 [ytr_nCores, ytst_nCores, ycv_nCores] = split_sample (y_nCores, train_frac, test_frac);
 [Xtr_nCores, Xtst_nCores, Xcv_nCores] = split_sample (X_nCores, train_frac, test_frac);
 
+%% Assign weights 1 for the first iteration
+weight=ones(size(ytr_nCores,1),1);
+weight_nCores=ones(size(ytr_nCores,1),1);
+
 %% TODO: train the machine learner with the obtainted
 %% knowlege base. Built using linear kernel for "_nCores" dataset
 %% and using RBF kernel for full featured datasets 
@@ -73,10 +77,9 @@ X_nCores = analytical_shuffled_nCores(:, 2:end);
 
 %% White box model, nCores^(-1) 
 sprintf("Training the SVR from on analytical model (nCores).")
-%weight_nCore(1:size(ytr_nCores,1))=1;
 [C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-model = svmtrain ([],ytr_nCores, Xtr_nCores, options);
+model = svmtrain (weight,ytr_nCores, Xtr_nCores, options);
 [predictions_nCore{1}, accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
 Cs_nCore(1) = C;
 Es_nCore(1) = eps;
@@ -89,10 +92,9 @@ b_nCore{1} = - model.rho;
 
 %% Black box model, RBF
 sprintf("Training the SVR from on analytical model.")
-
 [C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-model = svmtrain ([],ytr, Xtr, options);
+model = svmtrain (weight_nCores,ytr, Xtr, options);
 [predictions{1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
 Cs(1) = C;
 Es(1) = eps;
@@ -117,8 +119,12 @@ SVs_CV{1} = model.SVs;
 b_CV{1} = - model.rho;
 #}
 
+
 current_KB = analytical_shuffled;
 current_KB_nCore = analytical_shuffled_nCores;
+
+weight=ones(size(analytical_shuffled,1),1);
+weight_nCores=ones(size(analytical_shuffled_nCores,1),1);
 
 operational_data_chunks = collectSamples ([base_dir, query_operational_data], iterations);
 
@@ -147,31 +153,39 @@ for ii = 1: length(operational_data_chunks)
   %% TODO: updating the knowledge base [current_KB] 
   %% and [current_KB_nCore] with the operational sample
   %% for the current iteration
-  current_KB = updateKB (current_KB, current_chunk_shuffled);
-  current_KB_nCore = updateKB (current_KB_nCore, current_chunk_nCore_shuffled);
+  [current_KB, current_weight] = updateKB (current_KB, current_chunk_shuffled, weight);
+  [current_KB_nCore, current_weight_Ncores] = updateKB (current_KB_nCore, current_chunk_nCore_shuffled, weight_nCores);
+
+
   
   %% TODO: re-train the machine learner with the updated
   %% knowlege base. 
   %% At the end, improvement for different runs
+ 
 
   %% Separating prediction variables from target variable in the analytical dataset
   y = current_KB(:, 1);
-  X= current_KB(:, 2:end);
+  X = current_KB(:, 2:end);
+  weight = current_weight;
 
+  
   y_nCores = current_KB_nCore(:, 1);
   X_nCores = current_KB_nCore(:, 2:end);
-
-  %% Splitting the analytical datasets
+  weight_nCores = current_weight_Ncores;
+  
+  %% Splitting the analytical datasets and weights accordingly
   [ytr, ytst, ycv] = split_sample (y, train_frac, test_frac);
   [Xtr, Xtst, Xcv] = split_sample (X, train_frac, test_frac);
+  [Wtr, Wtst, Wcv] = split_sample (weight, train_frac, test_frac);
   [ytr_nCores, ytst_nCores, ycv_nCores] = split_sample (y_nCores, train_frac, test_frac);
   [Xtr_nCores, Xtst_nCores, Xcv_nCores] = split_sample (X_nCores, train_frac, test_frac);
+  [Wtr_nCores, Wtst_nCores, Wcv_nCores] = split_sample (X_nCores, train_frac, test_frac);
 
   %% White box model, nCores^(-1)
   sprintf("Re-training (%d) the SVR from on analytical model (nCores).", ii)
   [C, eps] = modelSelection (ytr_nCores, Xtr_nCores, ytst_nCores, Xtst_nCores, "-s 3 -t 0 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-  model = svmtrain ([], ytr_nCores, Xtr_nCores, options);
+  model = svmtrain (Wtr, ytr_nCores, Xtr_nCores, options);
   [predictions_nCore{ii+1}, accuracy, ~] = svmpredict (ycv_nCores, Xcv_nCores, model);
   Cs_nCore(ii+1) = C;
   Es_nCore(ii+1) = eps;
@@ -187,7 +201,8 @@ for ii = 1: length(operational_data_chunks)
   sprintf("Re-training (%d) the SVR from on analytical model.", ii)
   [C, eps] = modelSelection (ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-  model = svmtrain ([], ytr, Xtr, options);
+  model = svmtrain (Wtr_nCores, ytr, Xtr, options);
+  [predictions{ii+1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
   [predictions{ii+1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
   Cs(ii+1) = C;
   Es(ii+1) = eps;
