@@ -1,0 +1,5 @@
+- generare sistematicamente al termine del main i plot necessari e salvarli su file
+
+- debuggare codice capire perchè il MSE non decresce
+
+- aggiungere log al momento della generazione del modello

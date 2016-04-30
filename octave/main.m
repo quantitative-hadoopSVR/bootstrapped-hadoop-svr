@@ -23,10 +23,10 @@ C_range = linspace (0.1, 5, 20);
 E_range = linspace (0.1, 5, 20);
 
 %% Number of iterations for the re-training after the bootstrapping
-iterations = 3;
+iterations = 10;
 
 %% Initializing the Knowledge Base sampling the analytical data
-[analytical_sample, analytical_sample_nCore] = initKB ([base_dir, query_analytical_data]);
+[analytical_sample, analytical_sample_linear] = initKB ([base_dir, query_analytical_data]);
 
 
 %% Scaling and permutating the analytical dataset
@@ -41,7 +41,7 @@ sigma_ = sigma(1);
 mu_X = mu(2:end);
 sigma_X = sigma(2:end);
 
-[analytical_scaled_linear, mu, sigma] = zscore (analytical_sample_nCore);
+[analytical_scaled_linear, mu, sigma] = zscore (analytical_sample_linear);
 analytical_shuffled_linear = analytical_scaled_linear(permutation, :);
 
 mu_X_linear = mu(2:end);
@@ -83,14 +83,14 @@ sprintf("Training the SVR from on analytical model (linear).")
 [C, eps] = modelSelection (Wtr_linear, ytr_linear, Xtr_linear, ytst_linear, Xtst_linear, "-s 3 -t 0 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
 model = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
-[predictions_nCore{1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model);
-Cs_nCore(1) = C;
-Es_nCore(1) = eps;
-RMSEs_nCore(1) = sqrt (accuracy(2));
-MSE_nCore(1)=accuracy(2);
-coefficients_nCore{1} = model.sv_coef;
-SVs_nCore{1} = model.SVs;
-b_nCore{1} = - model.rho;
+[predictions_linear{1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model);
+Cs_linear(1) = C;
+Es_linear(1) = eps;
+RMSEs_linear(1) = sqrt (accuracy(2));
+MSE_linear(1)=accuracy(2);
+coefficients_linear{1} = model.sv_coef;
+SVs_linear{1} = model.SVs;
+b_linear{1} = - model.rho;
 
 
 %% RBF kernel model
@@ -106,6 +106,8 @@ MSE(1)=accuracy(2);
 coefficients{1} = model.sv_coef;
 SVs{1} = model.SVs;
 b{1} = - model.rho;
+
+
 #{
 %% RBF kernel model, where you choose best parameters first and then train the model
 sprintf("Training the SVR from on analytical model.Black box model, RBF with best parameters")
@@ -123,16 +125,16 @@ b_CV{1} = - model.rho;
 #}
 
 
-current_KB = analytical_shuffled;
-current_KB_nCore = analytical_shuffled_linear;
+current_KB = analytical_shuffled
+current_KB_linear = analytical_shuffled_linear
 
 operational_data_chunks = collectSamples ([base_dir, query_operational_data], iterations);
 
 %%
 for ii = 1: length(operational_data_chunks)
   current_chunk = operational_data_chunks{ii};
-  current_chunk_nCore = current_chunk;
-  current_chunk_nCore(:, end) = 1 ./ current_chunk_nCore(:, end);
+  current_chunk_linear = current_chunk;
+  current_chunk_linear(:, end) = 1 ./ current_chunk_linear(:, end);
 
   %% Scaling and permutating the operational dataset 
   %% for the current iteration
@@ -147,16 +149,18 @@ for ii = 1: length(operational_data_chunks)
   mu_X = mu(2:end);
   sigma_X = sigma(2:end);
 
-  [current_chunk_nCore_scaled, mu, sigma] = zscore (current_chunk_nCore);
-  current_chunk_nCore_shuffled = current_chunk_nCore_scaled(permutation, :);
+  [current_chunk_linear_scaled, mu, sigma] = zscore (current_chunk_linear);
+  current_chunk_linear_shuffled = current_chunk_linear_scaled(permutation, :);
   
   %% TODO: updating the knowledge base [current_KB] 
-  %% and [current_KB_nCore] with the operational sample
+  %% and [current_KB_linear] with the operational sample
   %% for the current iteration
   %% Use here the preferred update function among the available ones (merge or RNN).
   [current_KB, current_weight] = updateKB_RNN(current_KB, current_chunk_shuffled, weight);
-  [current_KB_nCore, current_weight_linear] = updateKB_RNN (current_KB_nCore, current_chunk_nCore_shuffled, weight_linear);
+  [current_KB_linear, current_weight_linear] = updateKB_RNN (current_KB_linear, current_chunk_linear_shuffled, weight_linear);
 
+  current_KB
+  current_KB_linear
   %% TODO: re-train the machine learner with the updated
   %% knowlege base. 
   %% At the end, improvement for different runs
@@ -168,8 +172,8 @@ for ii = 1: length(operational_data_chunks)
   weight = current_weight;
 
   
-  y_linear = current_KB_nCore(:, 1);
-  X_linear = current_KB_nCore(:, 2:end);
+  y_linear = current_KB_linear(:, 1);
+  X_linear = current_KB_linear(:, 2:end);
   weight_linear = current_weight_linear;
   
   %% Splitting the analytical datasets and weights accordingly
@@ -185,14 +189,14 @@ for ii = 1: length(operational_data_chunks)
   [C, eps] = modelSelection (Wtr_linear, ytr_linear, Xtr_linear, ytst_linear, Xtst_linear, "-s 3 -t 0 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
   model = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
-  [predictions_nCore{ii+1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model);
-  Cs_nCore(ii+1) = C;
-  Es_nCore(ii+1) = eps;
-  MSE_nCore(ii+1)=accuracy(2);
-  RMSEs_nCore(ii+1) = sqrt (accuracy(2));
-  coefficients_nCore{ii+1} = model.sv_coef;
-  SVs_nCore{ii+1} = model.SVs;
-  b_nCore{ii+1} = - model.rho;
+  [predictions_linear{ii+1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model);
+  Cs_linear(ii+1) = C;
+  Es_linear(ii+1) = eps;
+  MSE_linear(ii+1)=accuracy(2);
+  RMSEs_linear(ii+1) = sqrt (accuracy(2));
+  coefficients_linear{ii+1} = model.sv_coef;
+  SVs_linear{ii+1} = model.SVs;
+  b_linear{ii+1} = - model.rho;
 
 
 
@@ -217,6 +221,6 @@ endfor
   model.totalSV;
   model.nSV;
   %plot(model.SVs);
-  %plot(model.SVs_nCore);
+  %plot(model.SVs_linear);
   %plot(model.SVR);
 
