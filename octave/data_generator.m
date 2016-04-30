@@ -5,10 +5,10 @@ close all hidden
 clc
 rand ("seed", 17)
 
-output_file_analyt = "/home/irma/quantitative/bootstrapped-hadoop-svr/source_data/analyt/dataAM.csv";
-output_file_oper_1 = "/home/irma/quantitative/bootstrapped-hadoop-svr/source_data/oper/dataOper1.csv";
-output_file_oper_2 = "/home/irma/quantitative/bootstrapped-hadoop-svr/source_data/oper/dataOper2.csv";
-output_file_oper_3 = "/home/irma/quantitative/bootstrapped-hadoop-svr/source_data/oper/dataOper3.csv";
+output_file_analyt = "../source_data/analyt/dataAM.csv";
+output_file_oper_1 = "../source_data/oper/dataOper1.csv";
+output_file_oper_2 = "../source_data/oper/dataOper2.csv";
+output_file_oper_3 = "../source_data/oper/dataOper3.csv";
 
 
 f = @(x) exp(-x ./ 2) .* 10000;
