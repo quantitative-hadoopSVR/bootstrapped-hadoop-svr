@@ -2,3 +2,4 @@
 *.mex
 *.o
 tester.m
+octave-workspace

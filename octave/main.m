@@ -6,8 +6,8 @@ warning("off")
 %% Input data parameters: path to folder containing 
 %% the analytical data and to folder containing 
 %% the operational data.
-query_analytical_data = "analyt";
-query_operational_data = "oper";
+query_analytical_data = "analyt/dataAM.csv";
+query_operational_data = "oper/dataOper.csv";
 base_dir = "../source_data/";
 
 %% Splitting parameters
