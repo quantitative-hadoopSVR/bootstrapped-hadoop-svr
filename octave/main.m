@@ -55,8 +55,8 @@ y_linear = analytical_shuffled_linear(:, 1);
 X_linear = analytical_shuffled_linear(:, 2:end);
 
 %% Assign weights 1 for the first iteration
-weight=ones(size(analytical_shuffled,1),1) * 2;
-weight_linear=ones(size(analytical_shuffled_linear,1),1) * 2;
+weight=ones(size(analytical_shuffled,1),1) * 1;
+weight_linear=ones(size(analytical_shuffled_linear,1),1) * 1;
 
 %% Splitting the analytical datasets
 [ytr, ytst, ycv] = split_sample (y, train_frac, test_frac);

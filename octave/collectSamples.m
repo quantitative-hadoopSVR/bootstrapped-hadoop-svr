@@ -8,6 +8,9 @@ files = glob ([directory, "/*.csv"]);
 
 chunks_to_return = {};
 
+rand ("seed", 17);
+
+
 %% here we assume that each operational file has the same 
 %% number or rows ( which basically means that each 
 %% real experiment is performed sampling the same
@@ -15,6 +18,10 @@ chunks_to_return = {};
 for ii = 1:numel (files)
   file = files{ii};
   last_sample = read_data (file);
+  [last_sample, ~] = clear_outliers (last_sample);
+  permutation = randperm (size (last_sample, 1));
+  [last_sample_scaled, mu, sigma] = zscore (last_sample);
+  last_sample_shuffled = last_sample_scaled(permutation, :);
   [clean_sample, indices] = clear_outliers (last_sample);
   splittable = clean_sample(1 : end - mod(size(clean_sample), nSlots), :);
   remaining_obs = clean_sample(end - mod(size(clean_sample), nSlots) + 1 : end, :);

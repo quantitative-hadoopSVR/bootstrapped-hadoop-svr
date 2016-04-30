@@ -5,7 +5,7 @@
   %%Assign weights to new samples. For now we consider that new samples are all
   %%weighted with the same value 2. 
   
-  weight_value=2;
+  weight_value=4;
 
   for ii = 1 : length(sample_to_add)
     e_new = sample_to_add(ii);
