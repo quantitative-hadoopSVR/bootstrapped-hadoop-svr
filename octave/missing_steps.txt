@@ -3,3 +3,5 @@
 - debuggare codice capire perchè il MSE non decresce
 
 - aggiungere log al momento della generazione del modello
+
+- draftare presentazione
