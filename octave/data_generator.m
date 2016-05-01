@@ -14,11 +14,11 @@ input_range = input_range (:);
 output_values = output_values (:);
 
 output_values_oper = output_values;
-output_values_oper(7:17) = output_values(7:17) + rand(11, 1)*5;
+output_values_oper(7:17) = output_values(7:17) + rand(11, 1)*3;
 result_oper = [output_values_oper, input_range];
 dlmwrite (output_file_oper,result_oper);
 
 output_values_analyt = output_values;
-output_values_analyt(7:17) = output_values_analyt(7:17) + rand(11, 1)*20;
+output_values_analyt(7:17) = output_values_analyt(7:17) + rand(11, 1)*12;
 result_analyt = [output_values_analyt, input_range];
 dlmwrite (output_file_analyt,result_analyt);
