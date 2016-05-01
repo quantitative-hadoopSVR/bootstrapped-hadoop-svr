@@ -82,19 +82,19 @@ weight_linear=ones(size(analytical_shuffled_linear,1),1) * 1;
 sprintf("Training the SVR from on analytical model (linear).")
 [C, eps] = modelSelection (Wtr_linear, ytr_linear, Xtr_linear, ytst_linear, Xtst_linear, "-s 3 -t 0 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-model = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
-[predictions_linear{1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model);
+model_linear = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
+[predictions_linear{1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model_linear);
 Cs_linear(1) = C;
 Es_linear(1) = eps;
 RMSEs_linear(1) = sqrt (accuracy(2));
 MSE_linear(1)=accuracy(2);
-coefficients_linear{1} = model.sv_coef;
-SVs_linear{1} = model.SVs;
-b_linear{1} = - model.rho;
+coefficients_linear{1} = model_linear.sv_coef;
+SVs_linear{1} = model_linear.SVs;
+b_linear{1} = - model_linear.rho;
 
 
 %% RBF kernel model
-sprintf("Training the SVR from on analytical model.")
+sprintf("Training the SVR from on analytical model.(kernel)")
 [C, eps] = modelSelection (Wtr, ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
 model = svmtrain (Wtr,ytr, Xtr, options);
@@ -125,8 +125,8 @@ b_CV{1} = - model.rho;
 #}
 
 
-current_KB = analytical_shuffled
-current_KB_linear = analytical_shuffled_linear
+current_KB = analytical_shuffled;
+current_KB_linear = analytical_shuffled_linear;
 
 operational_data_chunks = collectSamples ([base_dir, query_operational_data], iterations);
 
@@ -159,8 +159,6 @@ for ii = 1: length(operational_data_chunks)
   [current_KB, current_weight] = updateKB_RNN(current_KB, current_chunk_shuffled, weight);
   [current_KB_linear, current_weight_linear] = updateKB_RNN (current_KB_linear, current_chunk_linear_shuffled, weight_linear);
 
-  current_KB
-  current_KB_linear
   %% TODO: re-train the machine learner with the updated
   %% knowlege base. 
   %% At the end, improvement for different runs
@@ -188,20 +186,20 @@ for ii = 1: length(operational_data_chunks)
   sprintf("Re-training (%d) the SVR from on analytical model (linear).", ii)
   [C, eps] = modelSelection (Wtr_linear, ytr_linear, Xtr_linear, ytst_linear, Xtst_linear, "-s 3 -t 0 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-  model = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
-  [predictions_linear{ii+1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model);
+  model_linear = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
+  [predictions_linear{ii+1}, accuracy, ~] = svmpredict (ycv_linear, Xcv_linear, model_linear);
   Cs_linear(ii+1) = C;
   Es_linear(ii+1) = eps;
   MSE_linear(ii+1)=accuracy(2);
   RMSEs_linear(ii+1) = sqrt (accuracy(2));
-  coefficients_linear{ii+1} = model.sv_coef;
-  SVs_linear{ii+1} = model.SVs;
-  b_linear{ii+1} = - model.rho;
+  coefficients_linear{ii+1} = model_linear.sv_coef;
+  SVs_linear{ii+1} = model_linear.SVs;
+  b_linear{ii+1} = - model_linear.rho;
 
 
 
   %% Black box model, RBF
-  sprintf("Re-training (%d) the SVR from on analytical model.", ii)
+  sprintf("Re-training (%d) the SVR from on analytical model.(kernel)", ii)
   [C, eps] = modelSelection (Wtr, ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
   model = svmtrain (Wtr, ytr, Xtr, options);
@@ -217,10 +215,5 @@ for ii = 1: length(operational_data_chunks)
 
   
 endfor
-%check output meaning
-  model.totalSV;
-  model.nSV;
-  %plot(model.SVs);
-  %plot(model.SVs_linear);
-  %plot(model.SVR);
+
 
