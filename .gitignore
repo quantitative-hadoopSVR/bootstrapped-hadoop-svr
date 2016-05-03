@@ -2,5 +2,4 @@
 *.mex
 *.o
 tester.m
-*.jpg
 octave-workspace
