@@ -1,5 +1,4 @@
 distance should eb calculated considering only the variables (not also the label)
 
-remove re-shuffling of the operational chunk within the loop
-
-at the beginning of the loop the linear chunk is assigned to be equal to the normal chunk. Fix this.
+at the beginning of the loop the linear chunk is assigned to be equal to the normal chunk. Fix this
+.
