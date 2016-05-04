@@ -113,3 +113,7 @@ w_CV{ii+1} = model_CV.SVs' * model_CV.sv_coef;
 b_CV{ii+1} = -model_CV.rho;
   
 endfor
+
+%%save the plots. run the below function for that
+
+%%save_plots_CV(model_CV, RMSE_CVs, MSE_CV, iterations);
