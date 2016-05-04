@@ -118,30 +118,15 @@ for ii = 1: length(operational_data_chunks)
   current_chunk_linear = current_chunk;
   current_chunk_linear(:, end) = 1 ./ current_chunk_linear(:, end);
 
-  %% Scaling and permutating the operational dataset 
-  %% for the current iteration
-  rand ("seed", 17);
-  permutation = randperm (size (current_chunk, 1));
 
-  [current_chunk_scaled, mu, sigma] = zscore (current_chunk);
-  current_chunk_shuffled = current_chunk_scaled(permutation, :);
-
-  mu_y = mu(1);
-  sigma_ = sigma(1);
-  mu_X = mu(2:end);
-  sigma_X = sigma(2:end);
-
-  [current_chunk_linear_scaled, mu, sigma] = zscore (current_chunk_linear);
-  current_chunk_linear_shuffled = current_chunk_linear_scaled(permutation, :);
-  
-  %% TODO: updating the knowledge base [current_KB] 
+  %% updating the knowledge base [current_KB] 
   %% and [current_KB_linear] with the operational sample
   %% for the current iteration
   %% Use here the preferred update function among the available ones (merge or RNN).
-  [current_KB, current_weight] = updateKB_RNN(current_KB, current_chunk_shuffled, weight);
-  [current_KB_linear, current_weight_linear] = updateKB_RNN (current_KB_linear, current_chunk_linear_shuffled, weight_linear);
+  [current_KB, current_weight] = updateKB_RNN(current_KB, current_chunk, weight);
+  [current_KB_linear, current_weight_linear] = updateKB_RNN (current_KB_linear, current_chunk_linear, weight_linear);
 
-  %% TODO: re-train the machine learner with the updated
+  %% re-train the machine learner with the updated
   %% knowlege base. 
   %% At the end, improvement for different runs
  
@@ -197,6 +182,7 @@ for ii = 1: length(operational_data_chunks)
   
 endfor
 
-
+%% Call save plots when model is done from the command line using the command below
+%%save_plots(model, model_linear, RMSEs, RMSEs_linear, MSE, MSE_linear,iterations)
 
 
