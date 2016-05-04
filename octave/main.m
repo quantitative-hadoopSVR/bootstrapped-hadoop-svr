@@ -107,22 +107,6 @@ coefficients{1} = model.sv_coef;
 SVs{1} = model.SVs;
 b{1} = - model.rho;
 
-
-%% RBF kernel model, where you choose best parameters first and then train the model
-sprintf("Training the SVR from on analytical model.Black box model, RBF with best parameters with crossvalidation")
-[bestcv,bestc,bestg]=parameter_selection (ytr,Xtr,Wtr);
-options = ["-s 3 -t 2 -h 0 -g ", num2str(bestg), " -c ", num2str(bestc)];
-model_CV = svmtrain (Wtr,ytr, Xtr, options);
-[predictions_CV{1}, accuracy_CV, ~] = svmpredict (ycv, Xcv, model_CV);
-Cs_CV(1) = bestc;
-RMSE_CVs(1) = sqrt (accuracy_CV(2));
-MSE_CV(1)=accuracy_CV(2);
-coefficients_CV{1} = model_CV.sv_coef;
-SVs_CV{1} = model_CV.SVs;
-b_CV{1} = - model_CV.rho;
-
-
-
 current_KB = analytical_shuffled;
 current_KB_linear = analytical_shuffled_linear;
 
