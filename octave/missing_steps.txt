@@ -1,7 +1,5 @@
-- generare sistematicamente al termine del main i plot necessari e salvarli su file
+distance should eb calculated considering only the variables (not also the label)
 
-- debuggare codice capire perchè il MSE non decresce
+remove re-shuffling of the operational chunk within the loop
 
-- aggiungere log al momento della generazione del modello
-
-- draftare presentazione
+at the beginning of the loop the linear chunk is assigned to be equal to the normal chunk. Fix this.
