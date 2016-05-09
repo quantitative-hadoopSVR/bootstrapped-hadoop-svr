@@ -4,21 +4,18 @@ clc
 rand ("seed", 17);
 
 output_file_analyt = "../source_data/analyt/dataAM.csv";
-output_file_oper = "../source_data/oper/dataOper.csv";
 
+nMap = 23
+nRed = 24
+avg_Tmap = 23
+avg_Tred = 34
 
-f = @(x) 1 ./ (0.01*x) + 1;
+%TODO: change functions
+f = @(x) ceil(nMap ./ x) .* avg_Tmap + ceil(nRed ./ x) .* avg_Tred
 input_range = 1:120;
 output_values = f (input_range);
 input_range = input_range (:);
 output_values = output_values (:);
 
-output_values_oper = output_values;
-output_values_oper(7:17) = output_values(7:17) + rand(11, 1)*3;
-result_oper = [output_values_oper, input_range];
-dlmwrite (output_file_oper,result_oper);
-
-output_values_analyt = output_values;
-output_values_analyt(7:17) = output_values_analyt(7:17) + rand(11, 1)*12;
-result_analyt = [output_values_analyt, input_range];
+result_analyt = [output_values, input_range];
 dlmwrite (output_file_analyt,result_analyt);

@@ -3,17 +3,31 @@ close all hidden
 clc
 warning("off")
 
+
 %% Input data parameters: path to folder containing 
 %% the analytical data and to folder containing 
 %% the operational data.
-query_analytical_data = "analyt/dataAM.csv";
-query_operational_data = "oper/dataOper.csv";
+query = "R1";
+configuration_to_predict = 2
+avg_time_query_vector = [24 234 234 2345];
+
+configurations = [60 80 100 120]
+
+%% 60 = 1 ; 80 = 2; 100 = 3; 120 = 4
+query_analytical_data = ["analyt/dataAM_" query ".csv"]
+query_operational_data_60 = ["oper/dataOper_" query "_60.csv"]
+query_operational_data_80 = ["oper/dataOper_" query "_80.csv"]
+query_operational_data_100 = ["oper/dataOper_" query "_100.csv"]
+query_operational_data_120 = ["oper/dataOper_" query "_120.csv"]
+
 base_dir = "../source_data/";
 
 %% Splitting parameters
-train_frac = 0.6;
-test_frac = 0.2;
+train_frac = 0.7;
+test_frac = 0.3;
 
+oper_weight_value = 10;
+analyt_weight_value = 1;
 
 %% Ranges to be used to the identification
 %% of the optimal "C" and "epsilon" parameter of the SVR
@@ -23,7 +37,7 @@ C_range = linspace (0.1, 5, 20);
 E_range = linspace (0.1, 5, 20);
 
 %% Number of iterations for the re-training after the bootstrapping
-iterations = 10;
+iterations = 100;
 
 %% Initializing the Knowledge Base sampling the analytical data
 [analytical_sample, analytical_sample_linear] = initKB ([base_dir, query_analytical_data]);
@@ -55,17 +69,21 @@ y_linear = analytical_shuffled_linear(:, 1);
 X_linear = analytical_shuffled_linear(:, 2:end);
 
 %% Assign weights 1 for the first iteration
-weight=ones(size(analytical_shuffled,1),1) * 1;
-weight_linear=ones(size(analytical_shuffled_linear,1),1) * 1;
+weight=ones(size(analytical_shuffled,1),1) * analyt_weight_value;
+weight_linear=ones(size(analytical_shuffled_linear,1),1) * analyt_weight_value;
 
 %% Splitting the analytical datasets
-[ytr, ytst, ycv] = split_sample (y, train_frac, test_frac);
-[Xtr, Xtst, Xcv] = split_sample (X, train_frac, test_frac);
-[Wtr, Wtst, Wcv] = split_sample (weight, train_frac, test_frac);
-[ytr_linear, ytst_linear, ycv_linear] = split_sample (y_linear, train_frac, test_frac);
-[Xtr_linear, Xtst_linear, Xcv_linear] = split_sample (X_linear, train_frac, test_frac);
-[Wtr_linear, Wtst_linear, Wcv_linear] = split_sample (weight_linear, train_frac, test_frac);
+[ytr, ytst, ~] = split_sample (y, train_frac, test_frac);
+[Xtr, Xtst, ~] = split_sample (X, train_frac, test_frac);
+[Wtr, Wtst, ~] = split_sample (weight, train_frac, test_frac);
+[ytr_linear, ytst_linear, ~] = split_sample (y_linear, train_frac, test_frac);
+[Xtr_linear, Xtst_linear, ~] = split_sample (X_linear, train_frac, test_frac);
+[Wtr_linear, Wtst_linear, ~] = split_sample (weight_linear, train_frac, test_frac);
 
+ycv = avg_time_query_vector(configuration_to_predict);
+Xcv = configurations(configuration_to_predict);
+ycv_linear = avg_time_query_vector(configuration_to_predict);
+Xcv_linear = 1 / Xcv
 %% TODO: train the machine learner with the obtainted
 %% knowlege base. Built using linear kernel for "_linear" dataset
 %% and using RBF kernel for full featured datasets 
@@ -110,7 +128,36 @@ b{1} = - model.rho;
 current_KB = analytical_shuffled;
 current_KB_linear = analytical_shuffled_linear;
 
-operational_data_chunks = collectSamples ([base_dir, query_operational_data], iterations);
+%% TODO: .....
+operational_data = [];
+
+operational_data_60 = read_data(query_operational_data_60)
+operational_data_80 = read_data(query_operational_data_80)
+operational_data_100 = read_data(query_operational_data_100)
+operational_data_120 = read_data(query_operational_data_120)
+
+
+if configuration_to_predict ~= 1
+  [operational_data_60_cleaned, ~] = clear_outliers (operational_data_60);
+  operational_data = [query_operational_data ; operational_data_60_cleaned]
+endif
+
+if configuration_to_predict ~= 2
+  [operational_data_80_cleaned, ~] = clear_outliers (operational_data_80);
+  operational_data = [query_operational_data ; operational_data_80_cleaned]
+endif
+
+if configuration_to_predict ~= 3
+  [operational_data_100_cleaned, ~] = clear_outliers (operational_data_100);
+  operational_data = [query_operational_data ; operational_data_100_cleaned]
+endif
+
+if configuration_to_predict ~= 4
+  [operational_data_120_cleaned, ~] = clear_outliers (operational_data_120);
+  operational_data = [query_operational_data ; operational_data_120_cleaned]
+endif
+
+operational_data_chunks = collectSamples (operational_data, iterations);
 
 %%
 for ii = 1: length(operational_data_chunks)
@@ -123,13 +170,12 @@ for ii = 1: length(operational_data_chunks)
   %% and [current_KB_linear] with the operational sample
   %% for the current iteration
   %% Use here the preferred update function among the available ones (merge or RNN).
-  [current_KB, current_weight] = updateKB_RNN(current_KB, current_chunk, weight);
-  [current_KB_linear, current_weight_linear] = updateKB_RNN (current_KB_linear, current_chunk_linear, weight_linear);
+  [current_KB, current_weight] = updateKB_RNN(current_KB, current_chunk, weight, oper_weight_value);
+  [current_KB_linear, current_weight_linear] = updateKB_RNN (current_KB_linear, current_chunk_linear, weight_linear, oper_weight_value);
 
   %% re-train the machine learner with the updated
   %% knowlege base. 
   %% At the end, improvement for different runs
- 
 
   %% Separating prediction variables from target variable in the analytical dataset
   y = current_KB(:, 1);
@@ -142,12 +188,12 @@ for ii = 1: length(operational_data_chunks)
   weight_linear = current_weight_linear;
   
   %% Splitting the analytical datasets and weights accordingly
-  [ytr, ytst, ycv] = split_sample (y, train_frac, test_frac);
-  [Xtr, Xtst, Xcv] = split_sample (X, train_frac, test_frac);
-  [Wtr, Wtst, Wcv] = split_sample (weight, train_frac, test_frac);
-  [ytr_linear, ytst_linear, ycv_linear] = split_sample (y_linear, train_frac, test_frac);
-  [Xtr_linear, Xtst_linear, Xcv_linear] = split_sample (X_linear, train_frac, test_frac);
-  [Wtr_linear, Wtst_linear, Wcv_linear] = split_sample (weight_linear, train_frac, test_frac);
+  [ytr, ytst, ~] = split_sample (y, train_frac, test_frac);
+  [Xtr, Xtst, ~] = split_sample (X, train_frac, test_frac);
+  [Wtr, Wtst, ~] = split_sample (weight, train_frac, test_frac);
+  [ytr_linear, ytst_linear, ~] = split_sample (y_linear, train_frac, test_frac);
+  [Xtr_linear, Xtst_linear, ~] = split_sample (X_linear, train_frac, test_frac);
+  [Wtr_linear, Wtst_linear, ~] = split_sample (weight_linear, train_frac, test_frac);
 
   %% White box model, linear^(-1)
   sprintf("Re-training (%d) the SVR from on analytical model (linear).", ii)

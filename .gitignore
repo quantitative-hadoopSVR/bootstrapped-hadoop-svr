@@ -3,3 +3,4 @@
 *.o
 tester.m
 octave-workspace
+source_data/oper/cineca-runs-20160116/
