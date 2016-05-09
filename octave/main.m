@@ -9,7 +9,7 @@ warning("off")
 %% the operational data.
 query = "R1";
 configuration_to_predict = 2
-avg_time_query_vector = [24 234 234 2345];
+avg_time_query_vector = [351171.85 246397.5625 181882.1 171671.3625];
 
 configurations = [60 80 100 120]
 
