@@ -5,10 +5,11 @@ rand ("seed", 17);
 
 output_file_analyt = "../source_data/analyt/dataAM.csv";
 
-nMap = 23
-nRed = 24
-avg_Tmap = 23
-avg_Tred = 34
+nMap = 381
+nRed = 364
+avg_Tmap = 30052.278125
+avg_Tred = 2195.046875
+
 
 %TODO: change functions
 f = @(x) ceil(nMap ./ x) .* avg_Tmap + ceil(nRed ./ x) .* avg_Tred
