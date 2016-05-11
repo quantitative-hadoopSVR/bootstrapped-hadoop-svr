@@ -4,16 +4,18 @@ clc
 rand ("seed", 17);
 
 % available values are R1, R3, R5
-query = "R5"
+query = "R1"
 
 % available values are 250, 500, 750
-ssize = "250"
+ssize = "750"
 
 
-nMap = 4
-nRed = 4
-avg_Tmap = 13455.5375
-avg_Tred= 1423.6
+nRed = 455
+nMap = 434
+avg_Tmap = 29826.2375
+avg_Tred= 1917.3
+
+
 
 input_range = 1:10:120;
 
