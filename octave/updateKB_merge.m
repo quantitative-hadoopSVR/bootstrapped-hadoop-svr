@@ -1,4 +1,4 @@
-  function [updated, new_weight]  = updateKB (current_kb, sample_to_add, old_weight, weight_value)
+  function [updated, new_weight]  = updateKB_merge (current_kb, sample_to_add, old_weight, weight_value)
   
   %%Assign weights to new samples. For now we consider that new samples are all
   %%weighted with the same value 2. 

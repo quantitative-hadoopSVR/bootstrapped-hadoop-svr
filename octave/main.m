@@ -7,18 +7,28 @@ warning("off")
 %% Input data parameters: path to folder containing 
 %% the analytical data and to folder containing 
 %% the operational data.
-query = "R1";
-configuration_to_predict = 2
-avg_time_query_vector = [351171.85 246397.5625 181882.1 171671.3625];
+query = "R5";
+ssize = "250";
+configuration_to_predict = 2;
+%R1-250
+%avg_time_query_vector = [79316.55 63576.45 49026.8 42215.55];
 
-configurations = [60 80 100 120]
+%R3-250
+%avg_time_query_vector = [275684.25 197388.3 168209.25 143650.1];
+
+%R5-250
+avg_time_query_vector = [25924.65 25830.7 25316.1 26072.3];
+
+
+configurations = [60 80 100 120];
 
 %% 60 = 1 ; 80 = 2; 100 = 3; 120 = 4
-query_analytical_data = ["analyt/dataAM_" query ".csv"]
-query_operational_data_60 = ["oper/dataOper_" query "_60.csv"]
-query_operational_data_80 = ["oper/dataOper_" query "_80.csv"]
-query_operational_data_100 = ["oper/dataOper_" query "_100.csv"]
-query_operational_data_120 = ["oper/dataOper_" query "_120.csv"]
+query_analytical_data = ["analyt/" query "/" ssize "/dataAM.csv"];
+query_operational_data_60 = ["oper/" query "/" ssize "/dataOper_" num2str(configurations(1)) ".csv"];
+query_operational_data_80 = ["oper/" query "/" ssize "/dataOper_" num2str(configurations(2)) ".csv"];
+query_operational_data_100 = ["oper/" query "/" ssize "/dataOper_" num2str(configurations(3)) ".csv"];
+query_operational_data_120 = ["oper/" query "/" ssize "/dataOper_" num2str(configurations(4)) ".csv"];
+
 
 base_dir = "../source_data/";
 
@@ -36,72 +46,33 @@ analyt_weight_value = 1;
 C_range = linspace (0.1, 5, 20);
 E_range = linspace (0.1, 5, 20);
 
-%% Number of iterations for the re-training after the bootstrapping
-iterations = 100;
-
 %% Initializing the Knowledge Base sampling the analytical data
-[analytical_sample, analytical_sample_linear] = initKB ([base_dir, query_analytical_data]);
+[analytical_sample, ~] = initKB ([base_dir, query_analytical_data]);
+weight=ones(size(analytical_sample,1),1) * analyt_weight_value;
 
-
-%% Scaling and permutating the analytical dataset
 rand ("seed", 17);
+
 permutation = randperm (size (analytical_sample, 1));
 
-[analytical_scaled, mu, sigma] = zscore (analytical_sample);
-analytical_shuffled = analytical_scaled(permutation, :);
-
-mu_y = mu(1);
-sigma_ = sigma(1);
-mu_X = mu(2:end);
-sigma_X = sigma(2:end);
-
-[analytical_scaled_linear, mu, sigma] = zscore (analytical_sample_linear);
-analytical_shuffled_linear = analytical_scaled_linear(permutation, :);
-
-mu_X_linear = mu(2:end);
-sigma_X_linear = sigma(2:end);
+analytical_shuffled = analytical_sample(permutation, :);
+weight_shuffled = weight(permutation);
 
 %% Separating prediction variables from target variable in the analytical dataset get first column in y and second in X. 
 y = analytical_shuffled(:, 1);
-X= analytical_shuffled(:, 2:end);
-
-y_linear = analytical_shuffled_linear(:, 1);
-X_linear = analytical_shuffled_linear(:, 2:end);
-
-%% Assign weights 1 for the first iteration
-weight=ones(size(analytical_shuffled,1),1) * analyt_weight_value;
-weight_linear=ones(size(analytical_shuffled_linear,1),1) * analyt_weight_value;
+X= analytical_shuffled(:, 2);
 
 %% Splitting the analytical datasets
 [ytr, ytst, ~] = split_sample (y, train_frac, test_frac);
 [Xtr, Xtst, ~] = split_sample (X, train_frac, test_frac);
-[Wtr, Wtst, ~] = split_sample (weight, train_frac, test_frac);
-[ytr_linear, ytst_linear, ~] = split_sample (y_linear, train_frac, test_frac);
-[Xtr_linear, Xtst_linear, ~] = split_sample (X_linear, train_frac, test_frac);
-[Wtr_linear, Wtst_linear, ~] = split_sample (weight_linear, train_frac, test_frac);
-
-ycv = avg_time_query_vector(configuration_to_predict);
-Xcv = configurations(configuration_to_predict);
-ycv_linear = avg_time_query_vector(configuration_to_predict);
-Xcv_linear = 1 / Xcv
-%% TODO: train the machine learner with the obtainted
-%% knowlege base. Built using linear kernel for "_linear" dataset
-%% and using RBF kernel for full featured datasets 
-%% ( even if right now we don't have this distinction, let's
-%% keep it for possible future use and for applying both
-%% the techniques in any case (it still makes sense to compare 
-%% linear and RBF kernels, if possible (single attribute) ).
-%% Anyway according to the LIBSVM guide, since in our case 
-%% the number of instances is much higher than the number of
-%% features, we should expect to get better accuracy using the RBF kernel.
-%% No need to try the polynomial kernel, according to the LIBSVM guide.
+[Wtr, Wtst, ~] = split_sample (weight_shuffled, train_frac, test_frac);
 
 %% Linear kernel model
 sprintf("Training the SVR from on analytical model (linear).")
-[C, eps] = modelSelection (Wtr_linear, ytr_linear, Xtr_linear, ytst_linear, Xtst_linear, "-s 3 -t 0 -q -h 0", C_range, E_range);
+[C, eps] = modelSelection (Wtr, ytr, Xtr, ytst, Xtst, "-s 3 -t 0 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-model_linear = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
-[predictions_linear{1}, accuracy_linear, ~] = svmpredict (ycv_linear, Xcv_linear, model_linear);
+model_linear = svmtrain (Wtr, ytr, Xtr, options);
+[predictions_linear{1}, accuracy_linear, ~] = svmpredict (avg_time_query_vector.', configurations.', model_linear);
+plot_predictions(query, ssize, "linear", num2str(configurations(configuration_to_predict)), "analyt", predictions_linear{1}, avg_time_query_vector)
 Cs_linear(1) = C;
 Es_linear(1) = eps;
 RMSEs_linear(1) = sqrt (accuracy_linear(2));
@@ -116,7 +87,8 @@ sprintf("Training the SVR from on analytical model.(kernel)")
 [C, eps] = modelSelection (Wtr, ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
 options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
 model = svmtrain (Wtr,ytr, Xtr, options);
-[predictions{1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
+[predictions{1}, accuracy, ~] = svmpredict (avg_time_query_vector.', configurations.', model);
+plot_predictions(query, ssize, "gaussian", num2str(configurations(configuration_to_predict)), "analyt", predictions{1}, avg_time_query_vector)
 Cs(1) = C;
 Es(1) = eps;
 RMSEs(1) = sqrt (accuracy(2));
@@ -125,82 +97,58 @@ coefficients{1} = model.sv_coef;
 SVs{1} = model.SVs;
 b{1} = - model.rho;
 
-current_KB = analytical_shuffled;
-current_KB_linear = analytical_shuffled_linear;
+current_KB = analytical_sample;
+current_weight = weight
 
-%% TODO: .....
-operational_data = [];
+operational_data_60 = read_data([base_dir query_operational_data_60])
+operational_data_80 = read_data([base_dir query_operational_data_80])
+operational_data_100 = read_data([base_dir query_operational_data_100])
+operational_data_120 = read_data([base_dir query_operational_data_120])
 
-operational_data_60 = read_data(query_operational_data_60)
-operational_data_80 = read_data(query_operational_data_80)
-operational_data_100 = read_data(query_operational_data_100)
-operational_data_120 = read_data(query_operational_data_120)
+[operational_data_60_cleaned, ~] = clear_outliers (operational_data_60);
+[operational_data_80_cleaned, ~] = clear_outliers (operational_data_80);
+[operational_data_100_cleaned, ~] = clear_outliers (operational_data_100);
+[operational_data_120_cleaned, ~] = clear_outliers (operational_data_120);
 
+for ii = 1: min([length(operational_data_60_cleaned) length(operational_data_80_cleaned) length(operational_data_100_cleaned) length(operational_data_120_cleaned)])
 
-if configuration_to_predict ~= 1
-  [operational_data_60_cleaned, ~] = clear_outliers (operational_data_60);
-  operational_data = [query_operational_data ; operational_data_60_cleaned]
-endif
+  if ( configuration_to_predict == 1 )
+    current_chunk = [operational_data_80_cleaned(ii, :) ; operational_data_100_cleaned(ii, :) ; operational_data_120_cleaned(ii, :)];
+  endif
 
-if configuration_to_predict ~= 2
-  [operational_data_80_cleaned, ~] = clear_outliers (operational_data_80);
-  operational_data = [query_operational_data ; operational_data_80_cleaned]
-endif
+  if ( configuration_to_predict == 2 )
+    current_chunk = [operational_data_60_cleaned(ii, :) ; operational_data_100_cleaned(ii, :) ; operational_data_120_cleaned(ii, :)];
+  endif
 
-if configuration_to_predict ~= 3
-  [operational_data_100_cleaned, ~] = clear_outliers (operational_data_100);
-  operational_data = [query_operational_data ; operational_data_100_cleaned]
-endif
+  if ( configuration_to_predict == 3 )
+    current_chunk = [operational_data_60_cleaned(ii, :) ; operational_data_80_cleaned(ii, :) ; operational_data_120_cleaned(ii, :)];
+  endif
 
-if configuration_to_predict ~= 4
-  [operational_data_120_cleaned, ~] = clear_outliers (operational_data_120);
-  operational_data = [query_operational_data ; operational_data_120_cleaned]
-endif
+  if ( configuration_to_predict == 4 )
+    current_chunk = [operational_data_60_cleaned(ii, :) ; operational_data_80_cleaned(ii, :) ; operational_data_100_cleaned(ii, :)];
+  endif
 
-operational_data_chunks = collectSamples (operational_data, iterations);
+  [current_KB, current_weight] = updateKB_RNN(current_KB, current_chunk, current_weight, oper_weight_value);
 
-%%
-for ii = 1: length(operational_data_chunks)
-  current_chunk = operational_data_chunks{ii};
-  current_chunk_linear = current_chunk;
-  current_chunk_linear(:, end) = 1 ./ current_chunk_linear(:, end);
+  permutation = randperm (size (current_KB, 1));
 
+  current_KB_shuffled = current_KB(permutation, :);
+  current_weight_shuffled = current_weight(permutation);
 
-  %% updating the knowledge base [current_KB] 
-  %% and [current_KB_linear] with the operational sample
-  %% for the current iteration
-  %% Use here the preferred update function among the available ones (merge or RNN).
-  [current_KB, current_weight] = updateKB_RNN(current_KB, current_chunk, weight, oper_weight_value);
-  [current_KB_linear, current_weight_linear] = updateKB_RNN (current_KB_linear, current_chunk_linear, weight_linear, oper_weight_value);
+  y = current_KB_shuffled(:, 1);
+  X = current_KB_shuffled(:, 2);
 
-  %% re-train the machine learner with the updated
-  %% knowlege base. 
-  %% At the end, improvement for different runs
-
-  %% Separating prediction variables from target variable in the analytical dataset
-  y = current_KB(:, 1);
-  X = current_KB(:, 2:end);
-  weight = current_weight;
-
-  
-  y_linear = current_KB_linear(:, 1);
-  X_linear = current_KB_linear(:, 2:end);
-  weight_linear = current_weight_linear;
-  
-  %% Splitting the analytical datasets and weights accordingly
   [ytr, ytst, ~] = split_sample (y, train_frac, test_frac);
   [Xtr, Xtst, ~] = split_sample (X, train_frac, test_frac);
-  [Wtr, Wtst, ~] = split_sample (weight, train_frac, test_frac);
-  [ytr_linear, ytst_linear, ~] = split_sample (y_linear, train_frac, test_frac);
-  [Xtr_linear, Xtst_linear, ~] = split_sample (X_linear, train_frac, test_frac);
-  [Wtr_linear, Wtst_linear, ~] = split_sample (weight_linear, train_frac, test_frac);
+  [Wtr, Wtst, ~] = split_sample (current_weight_shuffled, train_frac, test_frac);
 
   %% White box model, linear^(-1)
   sprintf("Re-training (%d) the SVR from on analytical model (linear).", ii)
-  [C, eps] = modelSelection (Wtr_linear, ytr_linear, Xtr_linear, ytst_linear, Xtst_linear, "-s 3 -t 0 -q -h 0", C_range, E_range);
+  [C, eps] = modelSelection (Wtr, ytr, Xtr, ytst, Xtst, "-s 3 -t 0 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
-  model_linear = svmtrain (Wtr_linear, ytr_linear, Xtr_linear, options);
-  [predictions_linear{ii+1}, accuracy_linear, ~] = svmpredict (ycv_linear, Xcv_linear, model_linear);
+  model_linear = svmtrain (Wtr, ytr, Xtr, options);
+  [predictions_linear{ii+1}, accuracy_linear, ~] = svmpredict (avg_time_query_vector.', configurations.', model_linear);
+  plot_predictions(query, ssize, "linear", num2str(configurations(configuration_to_predict)), num2str(ii), predictions_linear{ii+1}, avg_time_query_vector)
   Cs_linear(ii+1) = C;
   Es_linear(ii+1) = eps;
   MSE_linear(ii+1)=accuracy_linear(2);
@@ -209,14 +157,13 @@ for ii = 1: length(operational_data_chunks)
   SVs_linear{ii+1} = model_linear.SVs;
   b_linear{ii+1} = - model_linear.rho;
 
-
-
   %% Black box model, RBF
   sprintf("Re-training (%d) the SVR from on analytical model.(kernel)", ii)
   [C, eps] = modelSelection (Wtr, ytr, Xtr, ytst, Xtst, "-s 3 -t 2 -q -h 0", C_range, E_range);
   options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
   model = svmtrain (Wtr, ytr, Xtr, options);
-  [predictions{ii+1}, accuracy, ~] = svmpredict (ycv, Xcv, model);
+  [predictions{ii+1}, accuracy, ~] = svmpredict (avg_time_query_vector.', configurations.', model);
+  plot_predictions(query, ssize, "gaussian", num2str(configurations(configuration_to_predict)), num2str(ii), predictions{ii+1}, avg_time_query_vector)
   Cs(ii+1) = C;
   Es(ii+1) = eps;
   MSE(ii+1)=accuracy(2);
@@ -227,8 +174,3 @@ for ii = 1: length(operational_data_chunks)
 
   
 endfor
-
-%% Call save plots when model is done from the command line using the command below
-%%save_plots(model, model_linear, RMSEs, RMSEs_linear, MSE, MSE_linear,iterations)
-
-

@@ -1,0 +1,412 @@
+ans = Training the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 44
+obj = -0.488317, rho = -0.007334
+nSV = 6, nBSV = 4
+Mean squared error = 7.27973e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_analyt.csv
+ans = Training the SVR from on analytical model.(kernel)
+.*
+optimization finished, #iter = 283
+obj = -37.778464, rho = -0.918492
+nSV = 19, nBSV = 13
+Mean squared error = 7.29241e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_analyt.csv
+operational_data_60 =
+
+   150958       60
+    68192       60
+    76461       60
+    68250       60
+   125029       60
+   111661       60
+    83789       60
+    66802       60
+    69003       60
+    74965       60
+    66802       60
+    70699       60
+    68647       60
+    70418       60
+    65387       60
+    73730       60
+    83568       60
+    74421       60
+    68661       60
+    68888       60
+
+operational_data_80 =
+
+   143962       80
+    64469       80
+    55762       80
+    55707       80
+   458178       80
+    55330       80
+    56512       80
+    69760       80
+    78965       80
+   296910       80
+    55749       80
+    85055       80
+    60846       80
+    56818       80
+    59300       80
+    57640       80
+   606386       80
+   260390       80
+    57379       80
+    56411       80
+
+operational_data_100 =
+
+   106688      100
+    49035      100
+    47123      100
+    43544      100
+    44195      100
+    48898      100
+    49404      100
+    45445      100
+    44163      100
+    50461      100
+    45662      100
+    49229      100
+    45247      100
+    43904      100
+    45859      100
+    46071      100
+    51572      100
+    48774      100
+    45720      100
+    43542      100
+
+operational_data_120 =
+
+   86601     120
+   41512     120
+   77216     120
+   38353     120
+   39539     120
+   38929     120
+   40344     120
+   39563     120
+   43131     120
+   41250     120
+   38458     120
+   36687     120
+   79451     120
+   38539     120
+   39094     120
+   37628     120
+   38374     120
+   38900     120
+   46079     120
+   44663     120
+
+ans = Re-training (1) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 144
+obj = -1.036697, rho = 0.035875
+nSV = 12, nBSV = 10
+Mean squared error = 7.27958e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_1.csv
+ans = Re-training (1) the SVR from on analytical model.(kernel)
+...*
+optimization finished, #iter = 507
+obj = -59.450890, rho = -0.911320
+nSV = 36, nBSV = 29
+Mean squared error = 7.29241e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_1.csv
+ans = Re-training (2) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 144
+obj = -1.032754, rho = 0.035875
+nSV = 12, nBSV = 10
+Mean squared error = 7.27958e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_2.csv
+ans = Re-training (2) the SVR from on analytical model.(kernel)
+..*
+optimization finished, #iter = 401
+obj = -52.370115, rho = -0.846352
+nSV = 36, nBSV = 30
+Mean squared error = 7.29242e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_2.csv
+ans = Re-training (3) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 144
+obj = -1.041821, rho = 0.035875
+nSV = 12, nBSV = 10
+Mean squared error = 7.27958e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_3.csv
+ans = Re-training (3) the SVR from on analytical model.(kernel)
+...*
+optimization finished, #iter = 567
+obj = -55.258514, rho = -0.876182
+nSV = 36, nBSV = 29
+Mean squared error = 7.29241e+09 (regression)
+Squared correlation coefficient = nan (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_3.csv
+ans = Re-training (4) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 144
+obj = -0.936798, rho = 0.035875
+nSV = 12, nBSV = 10
+Mean squared error = 7.27958e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_4.csv
+ans = Re-training (4) the SVR from on analytical model.(kernel)
+...*
+optimization finished, #iter = 556
+obj = -56.531138, rho = -0.916727
+nSV = 35, nBSV = 29
+Mean squared error = 7.29241e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_4.csv
+ans = Re-training (5) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.392362, rho = -0.004894
+nSV = 2, nBSV = 0
+Mean squared error = 7.28099e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_5.csv
+ans = Re-training (5) the SVR from on analytical model.(kernel)
+.....*
+optimization finished, #iter = 900
+obj = -57.130223, rho = -0.976090
+nSV = 39, nBSV = 33
+Mean squared error = 7.2924e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_5.csv
+ans = Re-training (6) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.392362, rho = -0.004894
+nSV = 2, nBSV = 0
+Mean squared error = 7.28099e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_6.csv
+ans = Re-training (6) the SVR from on analytical model.(kernel)
+....*
+optimization finished, #iter = 653
+obj = -53.274992, rho = -0.942120
+nSV = 46, nBSV = 39
+Mean squared error = 7.2924e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_6.csv
+ans = Re-training (7) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.392362, rho = -0.004894
+nSV = 2, nBSV = 0
+Mean squared error = 7.28099e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_7.csv
+ans = Re-training (7) the SVR from on analytical model.(kernel)
+...*
+optimization finished, #iter = 536
+obj = -61.611290, rho = -0.988139
+nSV = 47, nBSV = 39
+Mean squared error = 7.2924e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_7.csv
+ans = Re-training (8) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 90
+obj = -1.217177, rho = 0.059299
+nSV = 23, nBSV = 21
+Mean squared error = 7.27941e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_8.csv
+ans = Re-training (8) the SVR from on analytical model.(kernel)
+..*
+optimization finished, #iter = 404
+obj = -60.467540, rho = -0.905975
+nSV = 47, nBSV = 37
+Mean squared error = 7.29241e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_8.csv
+ans = Re-training (9) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.402014, rho = 0.052670
+nSV = 2, nBSV = 0
+Mean squared error = 7.28086e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_9.csv
+ans = Re-training (9) the SVR from on analytical model.(kernel)
+..*
+optimization finished, #iter = 406
+obj = -61.480320, rho = -0.932060
+nSV = 45, nBSV = 35
+Mean squared error = 7.29241e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_9.csv
+ans = Re-training (10) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.402014, rho = 0.052670
+nSV = 2, nBSV = 0
+Mean squared error = 7.28086e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_10.csv
+ans = Re-training (10) the SVR from on analytical model.(kernel)
+..*
+optimization finished, #iter = 477
+obj = -64.330710, rho = -0.977056
+nSV = 46, nBSV = 37
+Mean squared error = 7.2924e+09 (regression)
+Squared correlation coefficient = nan (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_10.csv
+ans = Re-training (11) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.394756, rho = 0.009449
+nSV = 2, nBSV = 0
+Mean squared error = 7.28096e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_11.csv
+ans = Re-training (11) the SVR from on analytical model.(kernel)
+..*
+optimization finished, #iter = 441
+obj = -62.961121, rho = -0.979347
+nSV = 45, nBSV = 37
+Mean squared error = 7.2924e+09 (regression)
+Squared correlation coefficient = nan (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_11.csv
+ans = Re-training (12) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.400996, rho = 0.046631
+nSV = 2, nBSV = 0
+Mean squared error = 7.28088e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_12.csv
+ans = Re-training (12) the SVR from on analytical model.(kernel)
+..*
+optimization finished, #iter = 389
+obj = -67.705612, rho = -1.015998
+nSV = 45, nBSV = 37
+Mean squared error = 7.29239e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_12.csv
+ans = Re-training (13) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.400996, rho = 0.046631
+nSV = 2, nBSV = 0
+Mean squared error = 7.28088e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_13.csv
+ans = Re-training (13) the SVR from on analytical model.(kernel)
+..*
+optimization finished, #iter = 391
+obj = -69.564878, rho = -1.016603
+nSV = 47, nBSV = 38
+Mean squared error = 7.29239e+09 (regression)
+Squared correlation coefficient = nan (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_13.csv
+ans = Re-training (14) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.391761, rho = -0.008501
+nSV = 2, nBSV = 0
+Mean squared error = 7.281e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_14.csv
+ans = Re-training (14) the SVR from on analytical model.(kernel)
+....*
+optimization finished, #iter = 739
+obj = -65.919328, rho = -1.027690
+nSV = 43, nBSV = 35
+Mean squared error = 7.29239e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_14.csv
+ans = Re-training (15) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 119
+obj = -1.280322, rho = 0.053416
+nSV = 26, nBSV = 24
+Mean squared error = 7.27916e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_15.csv
+ans = Re-training (15) the SVR from on analytical model.(kernel)
+.....*
+optimization finished, #iter = 939
+obj = -69.966496, rho = -1.028164
+nSV = 44, nBSV = 36
+Mean squared error = 7.29239e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_15.csv
+ans = Re-training (16) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.390087, rho = -0.018563
+nSV = 2, nBSV = 0
+Mean squared error = 7.28103e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_16.csv
+ans = Re-training (16) the SVR from on analytical model.(kernel)
+...*
+optimization finished, #iter = 639
+obj = -64.821766, rho = -1.032835
+nSV = 42, nBSV = 34
+Mean squared error = 7.29239e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_16.csv
+ans = Re-training (17) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 80
+obj = -1.172118, rho = 0.034732
+nSV = 14, nBSV = 12
+Mean squared error = 7.27925e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_17.csv
+ans = Re-training (17) the SVR from on analytical model.(kernel)
+....*
+optimization finished, #iter = 774
+obj = -65.078762, rho = -1.045980
+nSV = 39, nBSV = 32
+Mean squared error = 7.29239e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_17.csv
+ans = Re-training (18) the SVR from on analytical model (linear).
+*
+optimization finished, #iter = 1
+obj = -0.390087, rho = -0.018563
+nSV = 2, nBSV = 0
+Mean squared error = 7.28103e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_18.csv
+ans = Re-training (18) the SVR from on analytical model.(kernel)
+....*
+optimization finished, #iter = 761
+obj = -64.989273, rho = -1.032797
+nSV = 40, nBSV = 33
+Mean squared error = 7.29239e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_18.csv
+ans = Re-training (19) the SVR from on analytical model (linear).
+.*
+optimization finished, #iter = 200
+obj = -1.180205, rho = 0.053416
+nSV = 26, nBSV = 24
+Mean squared error = 7.27916e+09 (regression)
+Squared correlation coefficient = 0.349175 (regression)
+filepath = ../plots/R1/250/linear/missing_120/prediction_19.csv
+ans = Re-training (19) the SVR from on analytical model.(kernel)
+....*
+optimization finished, #iter = 789
+obj = -63.249229, rho = -1.024817
+nSV = 40, nBSV = 33
+Mean squared error = 7.29239e+09 (regression)
+Squared correlation coefficient = inf (regression)
+filepath = ../plots/R1/250/gaussian/missing_120/prediction_19.csv
