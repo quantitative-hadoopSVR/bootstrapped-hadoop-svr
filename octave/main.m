@@ -7,17 +7,17 @@ warning("off")
 %% Input data parameters: path to folder containing 
 %% the analytical data and to folder containing 
 %% the operational data.
-query = "R3";
+query = "R5";
 ssize = "250";
-configuration_to_predict = 4;
+configuration_to_predict = 2;
 %R1-250
-avg_time_query_vector = [79316.55 63576.45 49026.8 42215.55];
+%avg_time_query_vector = [79316.55 63576.45 49026.8 42215.55];
 
 %R3-250
-avg_time_query_vector = [275684.25 197388.3 168209.25 143650.1];
+%avg_time_query_vector = [275684.25 197388.3 168209.25 143650.1];
 
 %R5-250
-%avg_time_query_vector = [25924.65 25830.7 25316.1 26072.3];
+avg_time_query_vector = [25924.65 25830.7 25316.1 26072.3];
 
 
 configurations = [60 80 100 120];
