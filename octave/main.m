@@ -7,17 +7,17 @@ warning("off")
 %% Input data parameters: path to folder containing 
 %% the analytical data and to folder containing 
 %% the operational data.
-query = "R5";
+query = "R3";
 ssize = "250";
 configuration_to_predict = 4;
 %R1-250
-%avg_time_query_vector = [79316.55 63576.45 49026.8 42215.55];
+avg_time_query_vector = [79316.55 63576.45 49026.8 42215.55];
 
 %R3-250
-%avg_time_query_vector = [275684.25 197388.3 168209.25 143650.1];
+avg_time_query_vector = [275684.25 197388.3 168209.25 143650.1];
 
 %R5-250
-avg_time_query_vector = [25924.65 25830.7 25316.1 26072.3];
+%avg_time_query_vector = [25924.65 25830.7 25316.1 26072.3];
 
 
 configurations = [60 80 100 120];
@@ -72,7 +72,7 @@ sprintf("Training the SVR from on analytical model (linear).")
 options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
 model_linear = svmtrain (Wtr, ytr, Xtr, options);
 [predictions_linear{1}, accuracy_linear, ~] = svmpredict (avg_time_query_vector.', configurations.', model_linear);
-plot_predictions(query, ssize, "linear", num2str(configurations(configuration_to_predict)), "analyt", predictions_linear{1}, avg_time_query_vector)
+plot_predictions(query, ssize, "linear", num2str(configurations(configuration_to_predict)), "analyt", predictions_linear{1}, avg_time_query_vector,0)
 Cs_linear(1) = C;
 Es_linear(1) = eps;
 RMSEs_linear(1) = sqrt (accuracy_linear(2));
@@ -88,7 +88,7 @@ sprintf("Training the SVR from on analytical model.(kernel)")
 options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
 model = svmtrain (Wtr,ytr, Xtr, options);
 [predictions{1}, accuracy, ~] = svmpredict (avg_time_query_vector.', configurations.', model);
-plot_predictions(query, ssize, "gaussian", num2str(configurations(configuration_to_predict)), "analyt", predictions{1}, avg_time_query_vector)
+plot_predictions(query, ssize, "gaussian", num2str(configurations(configuration_to_predict)), "analyt", predictions{1}, avg_time_query_vector,0)
 Cs(1) = C;
 Es(1) = eps;
 RMSEs(1) = sqrt (accuracy(2));
@@ -148,7 +148,7 @@ for ii = 1: min([length(operational_data_60_cleaned) length(operational_data_80_
   options = ["-s 3 -t 0 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
   model_linear = svmtrain (Wtr, ytr, Xtr, options);
   [predictions_linear{ii+1}, accuracy_linear, ~] = svmpredict (avg_time_query_vector.', configurations.', model_linear);
-  plot_predictions(query, ssize, "linear", num2str(configurations(configuration_to_predict)), num2str(ii), predictions_linear{ii+1}, avg_time_query_vector)
+  plot_predictions(query, ssize, "linear", num2str(configurations(configuration_to_predict)), num2str(ii), predictions_linear{ii+1}, avg_time_query_vector,current_chunk)
   Cs_linear(ii+1) = C;
   Es_linear(ii+1) = eps;
   MSE_linear(ii+1)=accuracy_linear(2);
@@ -163,7 +163,7 @@ for ii = 1: min([length(operational_data_60_cleaned) length(operational_data_80_
   options = ["-s 3 -t 2 -h 0 -p ", num2str(eps), " -c ", num2str(C)];
   model = svmtrain (Wtr, ytr, Xtr, options);
   [predictions{ii+1}, accuracy, ~] = svmpredict (avg_time_query_vector.', configurations.', model);
-  plot_predictions(query, ssize, "gaussian", num2str(configurations(configuration_to_predict)), num2str(ii), predictions{ii+1}, avg_time_query_vector)
+  plot_predictions(query, ssize, "gaussian", num2str(configurations(configuration_to_predict)), num2str(ii), predictions{ii+1}, avg_time_query_vector,current_chunk)
   Cs(ii+1) = C;
   Es(ii+1) = eps;
   MSE(ii+1)=accuracy(2);
@@ -171,6 +171,5 @@ for ii = 1: min([length(operational_data_60_cleaned) length(operational_data_80_
   coefficients{ii+1} = model.sv_coef;
   SVs{ii+1} = model.SVs;
   b{ii+1} = - model.rho;
-
-  
+ 
 endfor
