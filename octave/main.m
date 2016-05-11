@@ -8,16 +8,29 @@ warning("off")
 %% the analytical data and to folder containing 
 %% the operational data.
 query = "R5";
-ssize = "250";
+ssize = "750";
 configuration_to_predict = 2;
-%R1-250
+%R1-250 done
 %avg_time_query_vector = [79316.55 63576.45 49026.8 42215.55];
+%R1-500 done
+%avg_time_query_vector = [378127.4 143139.95 132383.45 91809.2];
+%R1-750 done
+%avg_time_query_vector = [ 389562.6 268821.25 203531.45 199234.9];
 
-%R3-250
+%R3-250 done
 %avg_time_query_vector = [275684.25 197388.3 168209.25 143650.1];
+%R3-500 done
+%avg_time_query_vector = [1031505.95 526760.35 401827.9 303843.2];
+%R3-750 done
+%avg_time_query_vector = [1027329.7 791314.85 635991.05 661214.75];
 
-%R5-250
-avg_time_query_vector = [25924.65 25830.7 25316.1 26072.3];
+%R5-250 done
+%avg_time_query_vector = [25924.65 25830.7 25316.1 26072.3];
+%R5-500 done
+%avg_time_query_vector = [23685.9 23558.8 24619.65 25265.75];
+%R5-750 done
+avg_time_query_vector = [24392.45 23894.75 24887.85 24882.75];
+
 
 
 configurations = [60 80 100 120];
