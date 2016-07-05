@@ -1,3 +1,8 @@
+% This function clears the dirty input from outliers
+%
+% It removes all the points whose distances from the average value of the input 
+% are more than two times of the standard deviation of the input
+
 function [clean, indices] = clear_outliers (dirty)
 
 avg = mean (dirty);
