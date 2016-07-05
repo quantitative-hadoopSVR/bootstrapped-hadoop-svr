@@ -1,3 +1,5 @@
+% This function reads the data from input file and put it into output matrix
+
 function sample = read_data (filename)
 
 if (! ischar (filename))
